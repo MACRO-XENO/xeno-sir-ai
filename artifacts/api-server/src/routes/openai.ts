@@ -1,8 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, conversations, messages } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
-import { requireAuth } from "./auth";
+import { requireAuth, requireAdmin } from "./auth";
 
 const router: IRouter = Router();
 
@@ -13,15 +13,25 @@ router.get("/openai/conversations", requireAuth, async (req: Request, res: Respo
 
     let convs;
     if (role === "admin") {
-      convs = await db.select().from(conversations).orderBy(conversations.createdAt);
+      convs = await db
+        .select()
+        .from(conversations)
+        .orderBy(desc(conversations.createdAt))
+        .limit(200);
     } else {
-      convs = await db.select().from(conversations).where(eq(conversations.userId, userId));
+      convs = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.userId, userId))
+        .orderBy(desc(conversations.createdAt))
+        .limit(100);
     }
 
     res.json(convs.map(c => ({
       id: c.id,
       title: c.title,
       createdAt: c.createdAt,
+      userId: c.userId,
     })));
   } catch (err) {
     req.log.error({ err }, "List conversations error");
@@ -44,12 +54,26 @@ router.post("/openai/conversations", requireAuth, async (req: Request, res: Resp
 router.get("/openai/conversations/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = (req as any).userId;
+    const role = (req as any).userRole;
+
     const convs = await db.select().from(conversations).where(eq(conversations.id, id));
     if (!convs[0]) {
       res.status(404).json({ error: "Conversation not found" });
       return;
     }
-    const msgs = await db.select().from(messages).where(eq(messages.conversationId, id)).orderBy(messages.createdAt);
+
+    if (role !== "admin" && convs[0].userId !== userId) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
+
+    const msgs = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, id))
+      .orderBy(messages.createdAt);
+
     const conv = convs[0];
     res.json({
       id: conv.id,
@@ -63,9 +87,10 @@ router.get("/openai/conversations/:id", requireAuth, async (req: Request, res: R
   }
 });
 
-router.delete("/openai/conversations/:id", requireAuth, async (req: Request, res: Response) => {
+router.delete("/openai/conversations/:id", requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    await db.delete(messages).where(eq(messages.conversationId, id));
     await db.delete(conversations).where(eq(conversations.id, id));
     res.status(204).send();
   } catch (err) {
@@ -77,7 +102,24 @@ router.delete("/openai/conversations/:id", requireAuth, async (req: Request, res
 router.get("/openai/conversations/:id/messages", requireAuth, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const msgs = await db.select().from(messages).where(eq(messages.conversationId, id)).orderBy(messages.createdAt);
+    const userId = (req as any).userId;
+    const role = (req as any).userRole;
+
+    const convs = await db.select().from(conversations).where(eq(conversations.id, id));
+    if (!convs[0]) {
+      res.status(404).json({ error: "Conversation not found" });
+      return;
+    }
+    if (role !== "admin" && convs[0].userId !== userId) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
+
+    const msgs = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, id))
+      .orderBy(messages.createdAt);
     res.json(msgs);
   } catch (err) {
     req.log.error({ err }, "List messages error");
@@ -89,7 +131,11 @@ router.post("/openai/conversations/:id/messages", requireAuth, async (req: Reque
   try {
     const id = parseInt(req.params.id);
     const { content } = req.body;
-    const history = await db.select().from(messages).where(eq(messages.conversationId, id)).orderBy(messages.createdAt);
+    const history = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, id))
+      .orderBy(messages.createdAt);
 
     await db.insert(messages).values({ conversationId: id, role: "user", content });
 
