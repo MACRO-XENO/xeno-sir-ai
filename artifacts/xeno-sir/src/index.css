@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-display: 'Cinzel', serif;
+
+  /* Premium Dark Academic Palette */
+  --color-background: hsl(230 40% 6%);
+  --color-foreground: hsl(45 20% 90%);
+  
+  --color-card: hsl(230 35% 10%);
+  --color-card-foreground: hsl(45 20% 90%);
+  
+  --color-popover: hsl(230 35% 10%);
+  --color-popover-foreground: hsl(45 20% 90%);
+  
+  --color-primary: hsl(43 74% 49%); /* Rich Gold */
+  --color-primary-foreground: hsl(230 40% 6%);
+  
+  --color-secondary: hsl(215 30% 15%);
+  --color-secondary-foreground: hsl(45 20% 90%);
+  
+  --color-muted: hsl(230 25% 14%);
+  --color-muted-foreground: hsl(215 15% 65%);
+  
+  --color-accent: hsl(43 74% 49%);
+  --color-accent-foreground: hsl(230 40% 6%);
+  
+  --color-destructive: hsl(0 62.8% 30.6%);
+  --color-destructive-foreground: hsl(45 20% 90%);
+  
+  --color-border: hsl(215 25% 20%);
+  --color-input: hsl(215 25% 20%);
+  --color-ring: hsl(43 74% 49%);
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(193, 150, 40, 0.03), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(193, 150, 40, 0.04), transparent 25%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-wide;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-secondary rounded-full border-2 border-background;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground;
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-2xl shadow-black/50;
+}
+
+/* Markdown Styles */
+.prose {
+  @apply text-foreground max-w-none;
+}
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+.prose strong {
+  @apply text-primary font-bold;
+}
+.prose h1, .prose h2, .prose h3 {
+  @apply text-foreground font-display mt-8 mb-4 font-bold;
+}
+.prose ul {
+  @apply list-disc pl-6 mb-4 space-y-2;
+}
+.prose ol {
+  @apply list-decimal pl-6 mb-4 space-y-2;
+}
+.prose code {
+  @apply bg-secondary px-1.5 py-0.5 rounded text-primary text-sm font-mono;
+}
+.prose pre {
+  @apply bg-secondary/50 p-4 rounded-lg border border-border overflow-x-auto mb-4;
+}
+.prose pre code {
+  @apply bg-transparent p-0 text-foreground;
+}
+.prose blockquote {
+  @apply border-l-4 border-primary pl-4 italic text-muted-foreground mb-4;
+}

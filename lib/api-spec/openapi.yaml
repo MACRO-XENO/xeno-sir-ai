@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API specification for Xeno Sir AI Tutor
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: openai
+    description: OpenAI AI chat operations
+  - name: auth
+    description: Authentication operations
+  - name: lectures
+    description: Lecture transcript management
+  - name: students
+    description: Student management
 paths:
   /healthz:
     get:
@@ -24,6 +32,408 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login as admin or student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user info
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /lectures:
+    get:
+      operationId: listLectures
+      tags: [lectures]
+      summary: List all lectures
+      responses:
+        "200":
+          description: List of lectures
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lecture"
+    post:
+      operationId: createLecture
+      tags: [lectures]
+      summary: Create/add a new lecture transcript (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLectureBody"
+      responses:
+        "201":
+          description: Created lecture
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecture"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /lectures/{id}:
+    get:
+      operationId: getLecture
+      tags: [lectures]
+      summary: Get a single lecture
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lecture details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecture"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateLecture
+      tags: [lectures]
+      summary: Update a lecture (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLectureBody"
+      responses:
+        "200":
+          description: Updated lecture
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecture"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteLecture
+      tags: [lectures]
+      summary: Delete a lecture (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List all students (admin only)
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+    post:
+      operationId: createStudent
+      tags: [students]
+      summary: Create a new student account (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStudentBody"
+      responses:
+        "201":
+          description: Created student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+
+  /students/{id}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Get student details with chat history (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentWithConversations"
+    delete:
+      operationId: deleteStudent
+      tags: [students]
+      summary: Delete a student (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /openai/conversations:
+    get:
+      operationId: listOpenaiConversations
+      tags: [openai]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiConversation"
+    post:
+      operationId: createOpenaiConversation
+      tags: [openai]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpenaiConversationBody"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversation"
+
+  /openai/conversations/{id}:
+    get:
+      operationId: getOpenaiConversation
+      tags: [openai]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversationWithMessages"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+    delete:
+      operationId: deleteOpenaiConversation
+      tags: [openai]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /openai/conversations/{id}/messages:
+    get:
+      operationId: listOpenaiMessages
+      tags: [openai]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiMessage"
+    post:
+      operationId: sendOpenaiMessage
+      tags: [openai]
+      summary: Send a text message and receive a streaming text response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOpenaiMessageBody"
+      responses:
+        "200":
+          description: SSE stream of assistant text chunks
+          content:
+            text/event-stream: {}
+
+  /chat/ask:
+    post:
+      operationId: askXenoSir
+      tags: [openai]
+      summary: Ask Xeno Sir a question with lecture context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskXenoSirBody"
+      responses:
+        "200":
+          description: SSE stream of response
+          content:
+            text/event-stream: {}
+
+  /chat/exam:
+    post:
+      operationId: generateExam
+      tags: [openai]
+      summary: Generate an exam/quiz from lecture transcripts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateExamBody"
+      responses:
+        "200":
+          description: Generated exam questions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResponse"
+
+  /chat/history/{studentId}:
+    get:
+      operationId: getChatHistory
+      tags: [openai]
+      summary: Get chat history for a student (admin only)
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiConversation"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +444,332 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserInfo"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        role:
+          type: string
+          enum: [admin, student]
+        displayName:
+          type: string
+      required:
+        - id
+        - username
+        - role
+        - displayName
+
+    Lecture:
+      type: object
+      properties:
+        id:
+          type: integer
+        lectureNumber:
+          type: integer
+        title:
+          type: string
+        transcript:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - lectureNumber
+        - title
+        - transcript
+        - createdAt
+        - updatedAt
+
+    CreateLectureBody:
+      type: object
+      properties:
+        lectureNumber:
+          type: integer
+        title:
+          type: string
+        transcript:
+          type: string
+      required:
+        - lectureNumber
+        - title
+        - transcript
+
+    UpdateLectureBody:
+      type: object
+      properties:
+        lectureNumber:
+          type: integer
+        title:
+          type: string
+        transcript:
+          type: string
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        displayName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - displayName
+        - createdAt
+
+    StudentWithConversations:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        displayName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenaiConversation"
+      required:
+        - id
+        - username
+        - displayName
+        - createdAt
+        - conversations
+
+    CreateStudentBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        displayName:
+          type: string
+      required:
+        - username
+        - password
+        - displayName
+
+    AskXenoSirBody:
+      type: object
+      properties:
+        question:
+          type: string
+        lectureIds:
+          type: array
+          items:
+            type: integer
+          description: Optional - specific lecture IDs to focus on. If empty, uses all lectures.
+        conversationId:
+          type: integer
+          description: Optional - continue an existing conversation
+        language:
+          type: string
+          enum: [hindi, english, auto]
+          description: Response language preference
+      required:
+        - question
+
+    GenerateExamBody:
+      type: object
+      properties:
+        lectureIds:
+          type: array
+          items:
+            type: integer
+          description: Lecture IDs to generate exam from. If empty, uses all lectures.
+        difficulty:
+          type: string
+          enum: [basic, medium, advanced, extreme]
+        examType:
+          type: string
+          enum: [mcq, subjective, mixed]
+        questionCount:
+          type: integer
+          minimum: 5
+          maximum: 50
+      required:
+        - difficulty
+        - examType
+        - questionCount
+
+    ExamQuestion:
+      type: object
+      properties:
+        questionNumber:
+          type: integer
+        question:
+          type: string
+        type:
+          type: string
+          enum: [mcq, subjective]
+        options:
+          type: array
+          items:
+            type: string
+          description: For MCQ only
+        correctAnswer:
+          type: string
+        explanation:
+          type: string
+      required:
+        - questionNumber
+        - question
+        - type
+        - correctAnswer
+        - explanation
+
+    ExamResponse:
+      type: object
+      properties:
+        lecturesCovered:
+          type: array
+          items:
+            type: string
+        difficulty:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamQuestion"
+        totalQuestions:
+          type: integer
+      required:
+        - lecturesCovered
+        - difficulty
+        - questions
+        - totalQuestions
+
+    OpenaiConversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - createdAt
+
+    OpenaiMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    CreateOpenaiConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+
+    SendOpenaiMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    OpenaiConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenaiMessage"
+      required:
+        - id
+        - title
+        - createdAt
+        - messages
+
+    OpenaiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

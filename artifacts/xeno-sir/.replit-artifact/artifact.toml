@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Xeno Sir - AI Tutor"
+version = "1.0.0"
+id = "artifacts/xeno-sir"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24102
+
+[services.development]
+run = "pnpm --filter @workspace/xeno-sir run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/xeno-sir", "run", "build" ]
+publicDir = "artifacts/xeno-sir/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24102"
+BASE_PATH = "/"

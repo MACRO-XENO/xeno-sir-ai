@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For premium smooth animations and page transitions"
+  "react-markdown": "For rendering Xeno Sir's chat responses with rich formatting"
+  "remark-gfm": "For markdown tables and advanced formatting in chat"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility function to efficiently merge Tailwind CSS classes"
+
+images:
+  - path: "artifacts/xeno-sir/public/images/library-bg.png"
+    description: "A dark, moody, premium academic library background with subtle volumetric gold lighting, very atmospheric, soft focus, depth of field"
+    aspect_ratio: "16:9"
+  - path: "artifacts/xeno-sir/public/images/xeno-logo.png"
+    description: "A minimal, elegant academic crest logo in metallic gold on a pure black transparent background, featuring a stylized owl and book motif, premium luxury university style"
+    aspect_ratio: "1:1"
+
+notes:
+  - Auth uses standard JWT stored in localStorage under 'xeno_sir_token'
+  - SSE streams expect fetch with ReadableStream parsing, split by 'data: ' lines
+  - API calls require Authorization: Bearer <token> header
