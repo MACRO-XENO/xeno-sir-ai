@@ -7,15 +7,21 @@ const router: IRouter = Router();
 
 router.get("/lectures", requireAuth, async (req: Request, res: Response) => {
   try {
-    const lectures = await db.select({
-      id: lecturesTable.id,
-      lectureNumber: lecturesTable.lectureNumber,
-      title: lecturesTable.title,
-      createdAt: lecturesTable.createdAt,
-      updatedAt: lecturesTable.updatedAt,
-      transcript: lecturesTable.transcript,
-    }).from(lecturesTable).orderBy(lecturesTable.lectureNumber);
-    res.json(lectures);
+    const isAdmin = (req as any).userRole === "admin";
+
+    if (isAdmin) {
+      const lectures = await db.select().from(lecturesTable).orderBy(lecturesTable.lectureNumber);
+      res.json(lectures);
+    } else {
+      const lectures = await db.select({
+        id: lecturesTable.id,
+        lectureNumber: lecturesTable.lectureNumber,
+        title: lecturesTable.title,
+        createdAt: lecturesTable.createdAt,
+        updatedAt: lecturesTable.updatedAt,
+      }).from(lecturesTable).orderBy(lecturesTable.lectureNumber);
+      res.json(lectures);
+    }
   } catch (err) {
     req.log.error({ err }, "List lectures error");
     res.status(500).json({ error: "Internal server error" });
@@ -44,12 +50,18 @@ router.post("/lectures", requireAdmin, async (req: Request, res: Response) => {
 router.get("/lectures/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    const isAdmin = (req as any).userRole === "admin";
     const lectures = await db.select().from(lecturesTable).where(eq(lecturesTable.id, id));
     if (!lectures[0]) {
       res.status(404).json({ error: "Lecture not found" });
       return;
     }
-    res.json(lectures[0]);
+    if (!isAdmin) {
+      const { transcript, ...rest } = lectures[0];
+      res.json(rest);
+    } else {
+      res.json(lectures[0]);
+    }
   } catch (err) {
     req.log.error({ err }, "Get lecture error");
     res.status(500).json({ error: "Internal server error" });
