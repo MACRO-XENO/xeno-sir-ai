@@ -1,9 +1,116 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-api-hooks";
-import { LogOut, MessageSquare, GraduationCap, LayoutDashboard, Users, Book, NotebookText } from "lucide-react";
+import { LogOut, MessageSquare, GraduationCap, LayoutDashboard, Users, Book, NotebookText, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui";
+import { getAuthHeaders } from "@/lib/utils";
+
+function ChangePasswordModal({ onClose }: { onClose: () => void }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match");
+      return;
+    }
+    if (newPassword.length < 4) {
+      setError("New password must be at least 4 characters");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Something went wrong");
+      } else {
+        setSuccess(true);
+        setTimeout(onClose, 1500);
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-card border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+        <h2 className="text-lg font-bold text-foreground mb-1">Change Password</h2>
+        <p className="text-xs text-muted-foreground mb-5">Apna naya password set karo</p>
+        {success ? (
+          <p className="text-green-400 text-sm text-center py-4">✓ Password successfully changed!</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Current Password</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                className="w-full bg-secondary border border-white/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50"
+                placeholder="Purana password"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                className="w-full bg-secondary border border-white/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50"
+                placeholder="Naya password"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full bg-secondary border border-white/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50"
+                placeholder="Dobara likho"
+                required
+              />
+            </div>
+            {error && <p className="text-red-400 text-xs">{error}</p>}
+            <div className="flex gap-2 mt-1">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-2 rounded-lg border border-white/10 text-sm text-muted-foreground hover:bg-white/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 py-2 rounded-lg bg-primary text-black text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Change Password"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function XenoSirLogoMark() {
   return (
@@ -29,6 +136,7 @@ function XenoSirLogoMark() {
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [location] = useLocation();
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   if (!user) return <>{children}</>;
 
@@ -149,6 +257,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
               </div>
             </div>
+            {!isAdmin && (
+              <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => setShowChangePassword(true)}>
+                <KeyRound className="w-3 h-3 mr-2" />
+                Change Password
+              </Button>
+            )}
             <Button variant="outline" size="sm" className="w-full text-xs" onClick={logout}>
               <LogOut className="w-3 h-3 mr-2" />
               Sign Out
@@ -161,6 +275,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         {children}
       </main>
+
+      {showChangePassword && <ChangePasswordModal onClose={() => setShowChangePassword(false)} />}
     </div>
   );
 }

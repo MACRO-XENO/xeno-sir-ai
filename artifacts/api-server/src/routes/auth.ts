@@ -112,5 +112,31 @@ router.post("/auth/logout", (_req: Request, res: Response) => {
   res.json({ message: "Logged out successfully" });
 });
 
+router.put("/auth/change-password", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ error: "Current password and new password required" });
+      return;
+    }
+    if (newPassword.length < 4) {
+      res.status(400).json({ error: "New password must be at least 4 characters" });
+      return;
+    }
+    const userId = (req as any).userId;
+    const users = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    const user = users[0];
+    if (!user || user.passwordHash !== hashPassword(currentPassword)) {
+      res.status(401).json({ error: "Current password is incorrect" });
+      return;
+    }
+    await db.update(usersTable).set({ passwordHash: hashPassword(newPassword) }).where(eq(usersTable.id, userId));
+    res.json({ message: "Password changed successfully" });
+  } catch (err) {
+    req.log.error({ err }, "Change password error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;
 export { hashPassword };
