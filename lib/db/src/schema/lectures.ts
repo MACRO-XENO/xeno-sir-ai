@@ -7,7 +7,6 @@ export const lecturesTable = pgTable("lectures", {
   lectureNumber: integer("lecture_number").notNull(),
   title: text("title").notNull(),
   transcript: text("transcript").notNull(),
-  slides: text("slides"),
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
