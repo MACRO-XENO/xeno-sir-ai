@@ -243,7 +243,7 @@ export default function StudentChat() {
                       : "bg-transparent border-none px-0"
                   )}>
                     {msg.role === "assistant" && (
-                      <p className="text-xs font-semibold text-primary mb-1 tracking-wide">Xeno Sir</p>
+                      <p className="text-xs font-semibold text-primary mb-1 tracking-wide">Xeno</p>
                     )}
                     {msg.role === "user" ? (
                       <div className="space-y-2">
