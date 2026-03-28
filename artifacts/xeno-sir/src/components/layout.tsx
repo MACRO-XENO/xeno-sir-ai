@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-api-hooks";
-import { LogOut, MessageSquare, GraduationCap, LayoutDashboard, Users, Book } from "lucide-react";
+import { LogOut, MessageSquare, GraduationCap, LayoutDashboard, Users, Book, NotebookText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui";
 
@@ -36,6 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const studentLinks = [
     { href: "/", label: "Ask Xeno Sir", icon: MessageSquare },
+    { href: "/notes", label: "Notes", icon: NotebookText },
     { href: "/exam", label: "Take Exam", icon: GraduationCap },
   ];
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLectures, useManageLectures, useStudents, useManageStudents } from "@/hooks/use-api-hooks";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Textarea, Dialog, Badge } from "@/components/ui";
-import { Book, Users, Plus, Trash2, Edit, FileText, UserPlus, Clock } from "lucide-react";
+import { Book, Users, Plus, Trash2, Edit, FileText, UserPlus, Clock, NotebookText } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function AdminDashboard() {
@@ -46,12 +46,13 @@ function LecturesManager() {
   const [formData, setFormData] = useState({
     lectureNumber: "",
     title: "",
-    transcript: ""
+    transcript: "",
+    notes: ""
   });
 
   const openAdd = () => {
     setEditingLecture(null);
-    setFormData({ lectureNumber: "", title: "", transcript: "" });
+    setFormData({ lectureNumber: "", title: "", transcript: "", notes: "" });
     setIsDialogOpen(true);
   };
 
@@ -60,7 +61,8 @@ function LecturesManager() {
     setFormData({
       lectureNumber: l.lectureNumber.toString(),
       title: l.title,
-      transcript: l.transcript
+      transcript: l.transcript,
+      notes: l.notes || ""
     });
     setIsDialogOpen(true);
   };
@@ -71,7 +73,8 @@ function LecturesManager() {
       const payload = {
         lectureNumber: parseInt(formData.lectureNumber),
         title: formData.title,
-        transcript: formData.transcript
+        transcript: formData.transcript,
+        notes: formData.notes || undefined
       };
       
       if (editingLecture) {
@@ -122,6 +125,11 @@ function LecturesManager() {
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2 max-w-3xl">{l.transcript}</p>
                     <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground/60">
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Added {new Date(l.createdAt).toLocaleDateString()}</span>
+                      {l.notes && (
+                        <span className="flex items-center gap-1 text-primary/70">
+                          <NotebookText className="w-3 h-3" /> Notes added
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -169,11 +177,24 @@ function LecturesManager() {
             <label className="text-xs font-semibold uppercase text-muted-foreground">Transcript Content</label>
             <Textarea 
               required 
-              rows={15}
+              rows={12}
               placeholder="Paste the full lecture transcript here. This is what Xeno Sir will learn from."
               value={formData.transcript} 
               onChange={e => setFormData({...formData, transcript: e.target.value})}
               className="font-mono text-xs leading-relaxed"
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold uppercase text-muted-foreground">Lecture Notes</label>
+              <span className="text-xs text-muted-foreground/50 italic">Optional — students can read these</span>
+            </div>
+            <Textarea 
+              rows={8}
+              placeholder="Write clean, well-formatted notes for students. Markdown supported (# Headings, **bold**, - bullet points, etc.)"
+              value={formData.notes} 
+              onChange={e => setFormData({...formData, notes: e.target.value})}
+              className="text-sm leading-relaxed"
             />
           </div>
           <div className="pt-4 flex justify-end gap-3">
