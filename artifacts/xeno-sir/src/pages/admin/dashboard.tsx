@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLectures, useManageLectures, useStudents, useManageStudents, useGenerateLectureNotes, useGenerateAllNotes } from "@/hooks/use-api-hooks";
+import { useLectures, useManageLectures, useStudents, useManageStudents, useGenerateLectureNotes, useGenerateAllNotes, useRegenerateAllNotes } from "@/hooks/use-api-hooks";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Textarea, Dialog, Badge } from "@/components/ui";
 import { Book, Users, Plus, Trash2, Edit, FileText, UserPlus, Clock, NotebookText, Sparkles, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -41,6 +41,7 @@ function LecturesManager() {
   const { create, update, remove } = useManageLectures();
   const generateNotes = useGenerateLectureNotes();
   const generateAllNotes = useGenerateAllNotes();
+  const regenerateAllNotes = useRegenerateAllNotes();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState<any>(null);
@@ -118,6 +119,16 @@ function LecturesManager() {
     }
   };
 
+  const handleRegenerateAllNotes = async () => {
+    if (!confirm(`Regenerate fresh notes for ALL ${(lectures as any[]).length} lecture(s)? Purane notes replace ho jaayenge. This may take a few minutes.`)) return;
+    try {
+      const result = await regenerateAllNotes.mutateAsync();
+      alert(result.message);
+    } catch {
+      alert("Failed to regenerate notes. Try again.");
+    }
+  };
+
   const lecturesWithoutNotes = (lectures as any[]).filter((l: any) => !l.notes || l.notes.trim().length === 0);
 
   return (
@@ -133,6 +144,16 @@ function LecturesManager() {
             >
               <Sparkles className="w-4 h-4 mr-2 text-primary" />
               Generate Notes ({lecturesWithoutNotes.length})
+            </Button>
+          )}
+          {(lectures as any[]).length > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleRegenerateAllNotes}
+              isLoading={regenerateAllNotes.isPending}
+            >
+              <RefreshCw className="w-4 h-4 mr-2 text-amber-400" />
+              Regenerate ALL Notes
             </Button>
           )}
           <Button onClick={openAdd}>
