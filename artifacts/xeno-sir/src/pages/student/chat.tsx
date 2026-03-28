@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useAuth, useLectures, useConversations } from "@/hooks/use-api-hooks";
 import { useChatStream } from "@/hooks/use-chat-stream";
 import { Button } from "@/components/ui";
-import { Send, Bot, User, MessageSquarePlus, RefreshCw, BookOpen, Check, Menu, Globe } from "lucide-react";
+import { Send, Bot, User, MessageSquarePlus, RefreshCw, BookOpen, Check, Menu, Globe, ImagePlus, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,9 @@ export default function StudentChat() {
   const [input, setInput] = useState("");
   const [selectedLectures, setSelectedLectures] = useState<number[]>([]);
   const [language, setLanguage] = useState("auto");
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" && window.innerWidth < 768
   );
@@ -55,9 +58,34 @@ export default function StudentChat() {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isStreaming) return;
-    sendMessage(input, selectedLectures.length > 0 ? selectedLectures : undefined, language);
+    if ((!input.trim() && !imageBase64) || isStreaming) return;
+    sendMessage(input, selectedLectures.length > 0 ? selectedLectures : undefined, language, undefined, imageBase64 || undefined);
     setInput("");
+    setImageBase64(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      alert("Image 4MB se chhoti honi chahiye. Please compress karke try karo.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setImageBase64(dataUrl);
+      setImagePreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearImage = () => {
+    setImageBase64(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleLectureToggle = (id: number) => {
@@ -218,7 +246,18 @@ export default function StudentChat() {
                       : "bg-transparent border-none px-0"
                   )}>
                     {msg.role === "user" ? (
-                      <p className="text-foreground whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      <div className="space-y-2">
+                        {msg.imageUrl && (
+                          <img
+                            src={msg.imageUrl}
+                            alt="Uploaded"
+                            className="max-w-[240px] max-h-[180px] rounded-xl object-contain border border-white/10"
+                          />
+                        )}
+                        {msg.content && (
+                          <p className="text-foreground whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        )}
+                      </div>
                     ) : (
                       <div className="prose prose-invert prose-p:text-foreground/90 prose-headings:text-primary prose-strong:text-foreground prose-code:text-primary prose-ul:text-foreground/90 prose-ol:text-foreground/90 max-w-none">
                         {msg.content ? (
@@ -244,7 +283,42 @@ export default function StudentChat() {
         {/* Input Area */}
         <div className="p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent shrink-0">
           <div className="max-w-4xl mx-auto relative">
+            {/* Image Preview */}
+            {imagePreview && (
+              <div className="mb-2 pl-2">
+                <div className="relative inline-block">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="h-20 w-auto rounded-xl border border-white/10 object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center hover:bg-destructive/80 transition-colors"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              </div>
+            )}
             <form onSubmit={handleSend} className="relative flex items-end gap-2 bg-card border border-white/10 rounded-2xl shadow-2xl p-2 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/30 transition-all">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isStreaming || !!imageBase64}
+                className="shrink-0 w-10 h-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-white/5 flex items-center justify-center transition-colors disabled:opacity-30"
+                title="Photo attach karo"
+              >
+                <ImagePlus className="w-5 h-5" />
+              </button>
               <textarea
                 value={input}
                 onChange={e => {
@@ -259,7 +333,7 @@ export default function StudentChat() {
                   }
                 }}
                 placeholder="Apna doubt ya sawaal yahan likhiye... (Shift+Enter for new line)"
-                className="w-full max-h-[200px] min-h-[52px] bg-transparent resize-none outline-none text-foreground placeholder:text-muted-foreground py-3 px-4 leading-relaxed"
+                className="w-full max-h-[200px] min-h-[52px] bg-transparent resize-none outline-none text-foreground placeholder:text-muted-foreground py-3 px-2 leading-relaxed"
                 disabled={isStreaming}
                 rows={1}
               />
@@ -276,7 +350,7 @@ export default function StudentChat() {
                 ) : (
                   <button
                     type="submit"
-                    disabled={!input.trim() || hasNoLectures}
+                    disabled={(!input.trim() && !imageBase64) || hasNoLectures}
                     className="w-10 h-10 rounded-xl bg-primary text-background flex items-center justify-center hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     <Send className="w-4 h-4 ml-0.5" />
