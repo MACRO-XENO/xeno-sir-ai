@@ -218,7 +218,7 @@ Teach with fire. Use dashboard data to make answers concrete, data-driven, and c
 
 router.post("/chat/ask", requireAuth, async (req: Request, res: Response) => {
   try {
-    const { question, lectureIds, conversationId, language } = req.body;
+    const { question, lectureIds, conversationId, language, imageBase64 } = req.body;
     const userId = (req as any).userId;
 
     if (!question) {
@@ -265,13 +265,20 @@ router.post("/chat/ask", requireAuth, async (req: Request, res: Response) => {
 
     const systemPrompt = buildXenoSirSystemPrompt(lectures, language || "auto");
 
-    const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+    const userMessageContent: any = imageBase64
+      ? [
+          { type: "image_url", image_url: { url: imageBase64 } },
+          { type: "text", text: question }
+        ]
+      : question;
+
+    const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: any }> = [
       { role: "system", content: systemPrompt },
       ...history.slice(0, -1).map(m => ({
         role: m.role as "user" | "assistant",
         content: m.content,
       })),
-      { role: "user", content: question },
+      { role: "user", content: userMessageContent },
     ];
 
     res.setHeader("Content-Type", "text/event-stream");

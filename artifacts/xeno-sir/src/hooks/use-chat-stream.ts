@@ -6,6 +6,7 @@ interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
 }
 
 export function useChatStream() {
@@ -20,7 +21,8 @@ export function useChatStream() {
     question: string, 
     lectureIds?: number[], 
     language?: string,
-    existingConversationId?: number
+    existingConversationId?: number,
+    imageBase64?: string
   ) => {
     if (!question.trim() || isStreaming) return;
 
@@ -29,7 +31,8 @@ export function useChatStream() {
     const newUserMsg: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: question
+      content: question,
+      imageUrl: imageBase64 || undefined
     };
     
     const newAssistantMsg: ChatMessage = {
@@ -54,7 +57,8 @@ export function useChatStream() {
           question,
           lectureIds,
           conversationId: convIdToUse,
-          language: language || "auto"
+          language: language || "auto",
+          imageBase64: imageBase64 || undefined
         }),
         signal: abortControllerRef.current.signal
       });
