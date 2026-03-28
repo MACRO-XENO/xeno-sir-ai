@@ -22,45 +22,43 @@ async function generateNotesFromTranscript(
 
 LECTURE ${lectureNumber}: ${title}
 
-TRANSCRIPT:
+TRANSCRIPT (raw — contains timestamps and filler words, IGNORE all of that):
 ${transcript}
 
 ---
 
-YOUR TASK: Create comprehensive, high-quality Markdown study notes based ONLY on the content in this transcript. Do not add anything that was not covered in the lecture.
+YOUR TASK: Create comprehensive, high-quality Markdown study notes based ONLY on the concepts taught in this transcript.
 
-NOTES REQUIREMENTS:
-- **Easy to understand** — write as if explaining to a smart student, not a textbook
-- **Detailed** — cover every concept that was taught in the lecture
-- **Examples** — for each major concept, include 2–3 real-world country examples (only if the transcript mentions or implies them; otherwise use relatable everyday analogies)
-- **Markdown formatting** — use # headings, ## subheadings, **bold** for key terms, bullet points, numbered lists, and > blockquotes for important definitions
-- **Structure**: Start with a brief overview, then cover each topic systematically
-- **Key Terms** — highlight all important macroeconomic terms in **bold**
-- Do NOT include anything beyond what is taught in this lecture's transcript
+STRICT RULES:
+- NEVER include any timestamps (e.g. "0:00", "1:23 minutes", "seconds"), time markers, or any raw transcript artifacts
+- NEVER include filler words, incomplete sentences, or conversational noise from the transcript
+- Extract only the actual macroeconomic knowledge and concepts being taught
+- Write in clean, polished academic language — as if a top student wrote perfect notes
+- **Easy to understand** — explain clearly, not like a dry textbook
+- **Detailed** — cover every concept taught
+- **Examples** — 2–3 real-world examples per major concept (countries, events, policies)
+- **Markdown formatting** — use # headings, ## subheadings, **bold** key terms, bullet points, > blockquotes for definitions
+- Only teach what is in this transcript — nothing extra
 
 FORMAT:
 # Lecture ${lectureNumber}: ${title}
 
 ## Overview
-[2-3 sentence summary of what this lecture covers]
+[2-3 sentence clean summary]
 
-## [Topic 1 from transcript]
-[Explanation...]
+## [Topic from lecture]
+[Clean explanation...]
 
-### Key Concept
-[Definition in bold, then explanation]
+> **Definition:** [key term defined clearly]
 
 **Example 1:** ...
 **Example 2:** ...
 
-## [Topic 2 from transcript]
-...
-
 ## Key Takeaways
-- [Bullet point summary of the most important points]
+- [Clean bullet summary]
 
 ---
-*Notes based on Xeno Sir's lecture transcript*`,
+*Xeno Sir — Lecture ${lectureNumber} Notes*`,
       },
     ],
   });
