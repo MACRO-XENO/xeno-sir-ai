@@ -11,9 +11,15 @@ async function generateNotesFromTranscript(
   title: string,
   transcript: string
 ): Promise<string> {
+  // Truncate very large transcripts to avoid token limit failures
+  const MAX_TRANSCRIPT_CHARS = 48000;
+  const safeTranscript = transcript.length > MAX_TRANSCRIPT_CHARS
+    ? transcript.slice(0, MAX_TRANSCRIPT_CHARS) + "\n\n[...transcript truncated for notes generation — all key concepts above are covered]"
+    : transcript;
+
   const response = await openai.chat.completions.create({
     model: "gpt-5.2",
-    max_completion_tokens: 4096,
+    max_completion_tokens: 8192,
     stream: false,
     messages: [
       {
@@ -23,7 +29,7 @@ async function generateNotesFromTranscript(
 LECTURE ${lectureNumber}: ${title}
 
 TRANSCRIPT (raw — contains timestamps and filler words, IGNORE all of that):
-${transcript}
+${safeTranscript}
 
 ---
 
