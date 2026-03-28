@@ -65,7 +65,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               XENO SIR
             </span>
           </div>
-          {/* Nav links (icons only) + user avatar */}
+          {/* Nav links with icons + labels + sign out */}
           <div className="flex items-center gap-1">
             {links.map((link) => {
               const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
@@ -74,23 +74,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                    "flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-all",
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                   )}
                 >
                   <link.icon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{link.label}</span>
+                  <span className="text-[9px] font-medium leading-none">{link.label}</span>
                 </Link>
               );
             })}
             <button
               onClick={logout}
-              className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all"
+              className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />
+              <span className="text-[9px] font-medium leading-none">Exit</span>
             </button>
           </div>
         </div>
