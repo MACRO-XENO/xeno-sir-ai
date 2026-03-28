@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import Login from "@/pages/login";
 import StudentChat from "@/pages/student/chat";
 import StudentExam from "@/pages/student/exam";
+import StudentNotes from "@/pages/student/notes";
 import AdminDashboard from "@/pages/admin/dashboard";
 import NotFound from "@/pages/not-found";
 
@@ -69,6 +70,9 @@ function Router() {
       </Route>
       <Route path="/exam">
         <ProtectedRoute component={StudentExam} role="student" />
+      </Route>
+      <Route path="/notes">
+        <ProtectedRoute component={StudentNotes} role="student" />
       </Route>
 
       {/* Admin Routes */}

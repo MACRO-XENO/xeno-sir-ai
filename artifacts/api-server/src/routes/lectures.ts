@@ -17,6 +17,7 @@ router.get("/lectures", requireAuth, async (req: Request, res: Response) => {
         id: lecturesTable.id,
         lectureNumber: lecturesTable.lectureNumber,
         title: lecturesTable.title,
+        notes: lecturesTable.notes,
         createdAt: lecturesTable.createdAt,
         updatedAt: lecturesTable.updatedAt,
       }).from(lecturesTable).orderBy(lecturesTable.lectureNumber);
@@ -30,7 +31,7 @@ router.get("/lectures", requireAuth, async (req: Request, res: Response) => {
 
 router.post("/lectures", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { lectureNumber, title, transcript } = req.body;
+    const { lectureNumber, title, transcript, notes } = req.body;
     if (!lectureNumber || !title || !transcript) {
       res.status(400).json({ error: "lectureNumber, title, and transcript are required" });
       return;
@@ -39,6 +40,7 @@ router.post("/lectures", requireAdmin, async (req: Request, res: Response) => {
       lectureNumber,
       title,
       transcript,
+      notes: notes || null,
     }).returning();
     res.status(201).json(lecture);
   } catch (err) {
@@ -71,11 +73,12 @@ router.get("/lectures/:id", requireAuth, async (req: Request, res: Response) => 
 router.put("/lectures/:id", requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const { lectureNumber, title, transcript } = req.body;
+    const { lectureNumber, title, transcript, notes } = req.body;
     const updateData: any = { updatedAt: new Date() };
     if (lectureNumber !== undefined) updateData.lectureNumber = lectureNumber;
     if (title !== undefined) updateData.title = title;
     if (transcript !== undefined) updateData.transcript = transcript;
+    if (notes !== undefined) updateData.notes = notes || null;
 
     const [lecture] = await db.update(lecturesTable).set(updateData).where(eq(lecturesTable.id, id)).returning();
     if (!lecture) {
