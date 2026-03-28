@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useLectures, useExamGenerator } from "@/hooks/use-api-hooks";
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from "@/components/ui";
-import { GraduationCap, BookOpen, AlertCircle, CheckCircle2, ChevronRight, RefreshCw } from "lucide-react";
+import { GraduationCap, BookOpen, CheckCircle2, ChevronRight, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function StudentExam() {
   const { data: lectures = [], isLoading: isLoadingLectures } = useLectures();
@@ -266,7 +268,7 @@ export default function StudentExam() {
                         <p className="text-foreground"><strong>Correct Answer:</strong> {q.correctAnswer}</p>
                       )}
                       <div className="text-muted-foreground leading-relaxed prose prose-invert max-w-none">
-                         <ReactMarkdown>{q.explanation}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{q.explanation}</ReactMarkdown>
                       </div>
                     </div>
                   </motion.div>
