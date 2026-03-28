@@ -151,3 +151,33 @@ export function useStudentChatHistory(studentId: number) {
     query: { enabled: !!studentId }
   });
 }
+
+export function useGenerateLectureNotes() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (lectureId: number) => {
+      const res = await fetch(`/api/lectures/${lectureId}/generate-notes`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Failed to generate notes");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/lectures"] }),
+  });
+}
+
+export function useGenerateAllNotes() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/lectures/generate-all-notes", {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Failed to generate notes");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/lectures"] }),
+  });
+}
