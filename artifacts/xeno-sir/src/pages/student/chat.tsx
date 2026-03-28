@@ -127,8 +127,8 @@ export default function StudentChat() {
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                <Bot className="w-4 h-4 text-primary" />
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30">
+                <img src="/images/xeno-sir-dp.jpg" alt="Xeno Sir" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h2 className="font-semibold text-foreground leading-tight">Xeno Sir</h2>
@@ -171,8 +171,8 @@ export default function StudentChat() {
                 transition={{ duration: 0.5 }}
                 className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/30 to-transparent p-1 mb-8"
               >
-                <div className="w-full h-full rounded-full bg-card border border-primary/30 flex items-center justify-center shadow-xl shadow-primary/10">
-                  <Bot className="w-10 h-10 text-primary" />
+                <div className="w-full h-full rounded-full overflow-hidden border border-primary/30 shadow-xl shadow-primary/10">
+                  <img src="/images/xeno-sir-dp.jpg" alt="Xeno Sir" className="w-full h-full object-cover" />
                 </div>
               </motion.div>
               <motion.h1
@@ -225,12 +225,15 @@ export default function StudentChat() {
                   className={cn("flex gap-4", msg.role === "user" ? "flex-row-reverse" : "flex-row")}
                 >
                   <div className={cn(
-                    "w-10 h-10 shrink-0 rounded-full flex items-center justify-center border",
+                    "w-10 h-10 shrink-0 rounded-full flex items-center justify-center border overflow-hidden",
                     msg.role === "user"
                       ? "bg-secondary border-white/10"
-                      : "bg-primary/10 border-primary/30 shadow-lg shadow-primary/10"
+                      : "border-primary/30 shadow-lg shadow-primary/10"
                   )}>
-                    {msg.role === "user" ? <User className="w-5 h-5 text-foreground" /> : <Bot className="w-5 h-5 text-primary" />}
+                    {msg.role === "user"
+                      ? <User className="w-5 h-5 text-foreground" />
+                      : <img src="/images/xeno-sir-dp.jpg" alt="Xeno Sir" className="w-full h-full object-cover" />
+                    }
                   </div>
 
                   <div className={cn(
