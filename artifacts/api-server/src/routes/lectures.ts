@@ -49,10 +49,16 @@ STRICT RULES:
 - NEVER include any timestamps (e.g. "0:00", "1:23 minutes", "seconds"), time markers, or any raw transcript artifacts
 - NEVER include filler words, incomplete sentences, or conversational noise from the transcript
 - Extract the actual macroeconomic knowledge from the transcript — dashboard data supports and enriches, not replaces
-- Write in clean, polished academic language — as if a top student wrote perfect notes
-- **Easy to understand** — explain clearly, not like a dry textbook
-- **Detailed** — cover every concept taught
-- **Examples** — 2–3 real-world examples per major concept (use dashboard data as real examples where relevant)
+- **LANGUAGE STYLE — MOST IMPORTANT:** Write in HINGLISH (Roman Hindi + English mixed) — exactly like an educated Indian student writes notes. English for all technical/economic terms, Roman Hindi for explanations, transitions, and context. Examples of the style:
+  - "Fed jab rates badhata hai, toh credit tighten hota hai — matlab loan lena mehnga ho jaata hai"
+  - "Yeh concept samajhna zaroori hai — Real Rate = Nominal Rate minus Inflation"
+  - "Jab yield curve invert hoti hai, iska matlab recession aa sakta hai aage"
+  - "DXY strengthen hota hai jab Fed hike karta hai — kyunki dollar-denominated assets attractive lagte hain"
+  - Technical terms ALWAYS in English: GDP, inflation, yield curve, Fed Funds Rate, DXY, PCE, FOMC, QE, QT, etc.
+  - Explanations and flow in Roman Hindi/Urdu: "matlab", "kyunki", "jab", "toh", "iska matlab", "samjho"
+- **Easy to understand** — bilkul simple aur clear, dry textbook jaisa nahi
+- **Detailed** — har concept jo transcript mein padha gaya, cover karo
+- **Examples** — 2–3 real-world examples per major concept (dashboard data se real figures use karo)
 - **Markdown formatting** — use # headings, ## subheadings, **bold** key terms, bullet points, > blockquotes for definitions
 - Only teach what is grounded in the transcript (supported by dashboard context)
 
