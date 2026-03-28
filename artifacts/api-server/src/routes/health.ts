@@ -18,15 +18,13 @@ router.get("/healthz", async (_req, res) => {
   }
 
   checks.openai = !!(
-    process.env.OPENAI_API_KEY ||
-    process.env.REPLIT_OPENAI_API_KEY ||
-    process.env.AI_API_KEY
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY &&
+    process.env.AI_INTEGRATIONS_OPENAI_BASE_URL
   );
 
   const allOk = checks.db && checks.openai;
 
   // Always return 200 so Replit deployment health checks pass.
-  // The status field in the body tells the admin dashboard what's actually happening.
   res.status(200).json({
     status: allOk ? "ok" : "error",
     checks,
