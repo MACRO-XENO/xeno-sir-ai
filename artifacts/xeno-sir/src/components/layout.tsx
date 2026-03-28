@@ -48,9 +48,56 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const links = isAdmin ? adminLinks : studentLinks;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background">
+    <div className="h-screen flex flex-col md:flex-row bg-background overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-full md:w-72 bg-card/50 backdrop-blur-xl border-r border-white/5 flex flex-col flex-shrink-0 z-20">
+      {/* Mobile: slim horizontal top bar */}
+      <aside className="md:hidden w-full bg-card/80 backdrop-blur-xl border-b border-white/5 flex-shrink-0 z-20">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-black/60 flex items-center justify-center border border-primary/25">
+              <XenoSirLogoMark />
+            </div>
+            <span
+              className="font-bold text-base text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-primary tracking-[0.1em]"
+              style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+            >
+              XENO SIR
+            </span>
+          </div>
+          {/* Nav links (icons only) + user avatar */}
+          <div className="flex items-center gap-1">
+            {links.map((link) => {
+              const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                  )}
+                >
+                  <link.icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{link.label}</span>
+                </Link>
+              );
+            })}
+            <button
+              onClick={logout}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Desktop: full sidebar */}
+      <aside className="hidden md:flex w-72 bg-card/50 backdrop-blur-xl border-r border-white/5 flex-col flex-shrink-0 z-20 h-full">
         <div className="p-5 flex items-center gap-3 border-b border-white/5">
           <div className="w-10 h-10 rounded-xl bg-black/60 flex items-center justify-center border border-primary/25 shadow-lg shadow-primary/10 shrink-0">
             <XenoSirLogoMark />
@@ -109,7 +156,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         {children}
       </main>
     </div>
