@@ -27,18 +27,34 @@ ${transcript}
 
 ---
 
-YOUR TASK: Create comprehensive, high-quality Markdown study notes based ONLY on the concepts taught in this transcript.
+SUPPLEMENTARY DASHBOARD CONTEXT (Federal Reserve Rate Dashboard used during class — use this to enrich explanations with real data and current figures where relevant):
+- Fed Funds Rate: 3.65% (target 3.50–3.75%), Feb 2026. Cycle peak: 5.33% (Jul 2023–Aug 2024). Hike cycle (2022–23): +525bps over 11 meetings in 16 months — fastest in 40 years. Cut cycle (2024–25): −175bps across 6 meetings.
+- CPI (Jan 2026): 3.0% | PCE (Dec 2025): 2.9% | Fed target: 2.0%. Real Rate (CPI): +0.65% | Real Rate (PCE): +0.75% → RESTRICTIVE
+- 10Y Treasury: 4.41% | 10Y–2Y Spread: +0.23% (re-normalizing after 24-month inversion, deepest: −1.07% Jul 2023 — deepest since 1981). Every US recession since 1955 preceded by yield curve inversion.
+- Intermarket: Rate hike → 10Y Treasury rises (+0.82 corr), DXY strengthens (+0.61 corr, forward-looking — peaks BEFORE real rate), Equities pressured (but soft landing kept S&P elevated in 2023), Gold inversely linked to real rates, INR weakens on capital outflows (+0.74 corr), Oil mixed (−0.28 corr).
+- DXY: Peaked near 114 (Sep 2022), cycle peak 109.1 (Jan 2025). KEY: DXY peaks before real rate peaks — it's forward-looking.
+- Global CBs: Fed 3.65% | ECB 2.65% (cutting) | RBI 6.25% (250bps above Fed → FII flows into India, but INR risk) | BoJ 0.50% (hiking — carry trade unwind risk) | BoE 4.50%.
+- QE/QT: Balance sheet pre-GFC $900B → COVID peak $8.97T. QT began Jun 2022 ($95B/month). QT ended Dec 1, 2025. Current: $6.60T. Shadow rate in 2022–23 was more restrictive than 5.33% nominal rate alone.
+- Taylor Rule: i = r* + π + 0.5(π − π*) + 0.5(y). Currently implies ~4.10%. Actual 3.65% → 45bps too loose. 2021 gap of −4 to −6% caused the inflation surge. Created by John B. Taylor, Stanford, 1993.
+- FedWatch: 30-Day Fed Funds Futures → implied rate = 100 − futures price. Mar 2026: 94.1% Hold. First cut: June 2026 (~47%). Trade the shift in expectations, not the meeting itself.
+- Bond-Rate Law: Rate ↑ → Bond Price ↓. Duration × rate move = % price change. 2022 hike cycle: 20Y+ bond funds lost 30–40%. Fed cutting → buy long-duration bonds (TLT).
+- Monetary Transmission: Rate hike → Credit tightens → Spending falls → Demand falls → CPI falls (6–18 months lag) → GDP slows → Jobs lost (9–18 months lag). Time lags: 6–24 months total.
+- All-time high rate: 20% (Jun 1981 Volcker Shock). All-time low: 0.07% (Mar 2021 COVID). ZIRP: 2008–2015 and 2020–2022.
+
+---
+
+YOUR TASK: Create comprehensive, high-quality Markdown study notes based on the concepts taught in the TRANSCRIPT above, enriched with real-world data from the DASHBOARD where directly relevant.
 
 STRICT RULES:
 - NEVER include any timestamps (e.g. "0:00", "1:23 minutes", "seconds"), time markers, or any raw transcript artifacts
 - NEVER include filler words, incomplete sentences, or conversational noise from the transcript
-- Extract only the actual macroeconomic knowledge and concepts being taught
+- Extract the actual macroeconomic knowledge from the transcript — dashboard data supports and enriches, not replaces
 - Write in clean, polished academic language — as if a top student wrote perfect notes
 - **Easy to understand** — explain clearly, not like a dry textbook
 - **Detailed** — cover every concept taught
-- **Examples** — 2–3 real-world examples per major concept (countries, events, policies)
+- **Examples** — 2–3 real-world examples per major concept (use dashboard data as real examples where relevant)
 - **Markdown formatting** — use # headings, ## subheadings, **bold** key terms, bullet points, > blockquotes for definitions
-- Only teach what is in this transcript — nothing extra
+- Only teach what is grounded in the transcript (supported by dashboard context)
 
 FORMAT:
 # Lecture ${lectureNumber}: ${title}
