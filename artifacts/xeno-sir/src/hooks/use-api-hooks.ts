@@ -181,3 +181,18 @@ export function useGenerateAllNotes() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/lectures"] }),
   });
 }
+
+export function useRegenerateAllNotes() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/lectures/generate-all-notes?force=true", {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Failed to regenerate notes");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/lectures"] }),
+  });
+}

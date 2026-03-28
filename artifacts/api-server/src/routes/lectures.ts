@@ -264,19 +264,22 @@ router.post("/lectures/:id/generate-notes", requireAdmin, async (req: Request, r
   }
 });
 
-// Generate notes for ALL lectures that don't have notes yet (parallel)
+// Generate/regenerate notes for ALL lectures (force = true regenerates even existing notes)
 router.post("/lectures/generate-all-notes", requireAdmin, async (req: Request, res: Response) => {
   try {
+    const force = req.query.force === "true";
     const allLectures = await db.select().from(lecturesTable).orderBy(lecturesTable.lectureNumber);
-    const withoutNotes = allLectures.filter(l => !l.notes || l.notes.trim().length === 0);
+    const toProcess = force
+      ? allLectures
+      : allLectures.filter(l => !l.notes || l.notes.trim().length === 0);
 
-    if (withoutNotes.length === 0) {
-      res.json({ total: 0, generated: 0, failed: 0, message: "All lectures already have notes." });
+    if (toProcess.length === 0) {
+      res.json({ total: 0, generated: 0, failed: 0, message: "All lectures already have notes. Use force=true to regenerate." });
       return;
     }
 
     const results = await Promise.allSettled(
-      withoutNotes.map(async (lecture) => {
+      toProcess.map(async (lecture) => {
         const notes = await generateNotesFromTranscript(lecture.lectureNumber, lecture.title, lecture.transcript);
         await db.update(lecturesTable)
           .set({ notes, updatedAt: new Date() })
@@ -288,10 +291,10 @@ router.post("/lectures/generate-all-notes", requireAdmin, async (req: Request, r
     const failed = results.filter(r => r.status === "rejected").length;
 
     res.json({
-      total: withoutNotes.length,
+      total: toProcess.length,
       generated,
       failed,
-      message: `Notes generated for ${generated} lecture(s).${failed > 0 ? ` ${failed} failed — try again.` : ""}`,
+      message: `Notes ${force ? "regenerated" : "generated"} for ${generated} lecture(s).${failed > 0 ? ` ${failed} failed — try again.` : ""}`,
     });
   } catch (err) {
     req.log.error({ err }, "Generate all notes error");
