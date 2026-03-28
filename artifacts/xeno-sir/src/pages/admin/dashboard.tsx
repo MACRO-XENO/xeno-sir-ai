@@ -1,8 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLectures, useManageLectures, useStudents, useManageStudents, useGenerateLectureNotes, useGenerateAllNotes, useRegenerateAllNotes } from "@/hooks/use-api-hooks";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Textarea, Dialog, Badge } from "@/components/ui";
 import { Book, Users, Plus, Trash2, Edit, FileText, UserPlus, Clock, NotebookText, Sparkles, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+
+function useSystemStatus() {
+  const [status, setStatus] = useState<"checking" | "ok" | "error">("checking");
+  const [checks, setChecks] = useState<{ db: boolean; openai: boolean } | null>(null);
+
+  const check = async () => {
+    try {
+      const res = await fetch("/api/healthz");
+      const data = await res.json();
+      setStatus(data.status === "ok" ? "ok" : "error");
+      setChecks(data.checks ?? null);
+    } catch {
+      setStatus("error");
+      setChecks(null);
+    }
+  };
+
+  useEffect(() => {
+    check();
+    const interval = setInterval(check, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return { status, checks };
+}
+
+function SystemStatus() {
+  const { status, checks } = useSystemStatus();
+
+  const dot =
+    status === "checking"
+      ? "bg-yellow-400 animate-pulse"
+      : status === "ok"
+      ? "bg-green-400"
+      : "bg-red-500 animate-pulse";
+
+  const label =
+    status === "checking"
+      ? "Checking..."
+      : status === "ok"
+      ? "All Systems OK"
+      : "System Issue Detected";
+
+  const detail =
+    status === "error" && checks
+      ? [!checks.db && "Database", !checks.openai && "OpenAI Key"].filter(Boolean).join(", ") + " — Problem"
+      : null;
+
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dot}`} />
+      <span className={status === "error" ? "text-red-400 font-semibold" : "text-muted-foreground"}>
+        {label}
+        {detail && <span className="ml-1 opacity-80">({detail})</span>}
+      </span>
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<"lectures" | "students">("lectures");
@@ -10,8 +68,15 @@ export default function AdminDashboard() {
   return (
     <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
       <header className="px-8 py-6 border-b border-white/5 bg-card/50 backdrop-blur-sm shrink-0">
-        <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">Admin Portal</h1>
-        <p className="text-muted-foreground mt-1">Manage Xeno Sir's knowledge base and students.</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">Admin Portal</h1>
+            <p className="text-muted-foreground mt-1">Manage Xeno Sir's knowledge base and students.</p>
+          </div>
+          <div className="mt-1">
+            <SystemStatus />
+          </div>
+        </div>
         
         <div className="flex gap-2 mt-8">
           <button 
