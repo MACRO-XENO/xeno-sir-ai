@@ -11,10 +11,10 @@ async function generateNotesFromTranscript(
   title: string,
   transcript: string
 ): Promise<string> {
-  // Truncate very large transcripts to avoid token limit failures
-  const MAX_TRANSCRIPT_CHARS = 48000;
+  // Safety truncation — only for extremely large transcripts (>80K chars)
+  const MAX_TRANSCRIPT_CHARS = 80000;
   const safeTranscript = transcript.length > MAX_TRANSCRIPT_CHARS
-    ? transcript.slice(0, MAX_TRANSCRIPT_CHARS) + "\n\n[...transcript truncated for notes generation — all key concepts above are covered]"
+    ? transcript.slice(0, MAX_TRANSCRIPT_CHARS) + "\n\n[...transcript truncated — all major concepts above are fully covered]"
     : transcript;
 
   const response = await openai.chat.completions.create({
@@ -284,17 +284,21 @@ router.post("/lectures/generate-all-notes", requireAdmin, async (req: Request, r
       return;
     }
 
-    const results = await Promise.allSettled(
-      toProcess.map(async (lecture) => {
+    // Sequential processing — one lecture at a time to prevent timeout on large transcripts
+    let generated = 0;
+    let failed = 0;
+    for (const lecture of toProcess) {
+      try {
         const notes = await generateNotesFromTranscript(lecture.lectureNumber, lecture.title, lecture.transcript);
         await db.update(lecturesTable)
           .set({ notes, updatedAt: new Date() })
           .where(eq(lecturesTable.id, lecture.id));
-      })
-    );
-
-    const generated = results.filter(r => r.status === "fulfilled").length;
-    const failed = results.filter(r => r.status === "rejected").length;
+        generated++;
+      } catch (err) {
+        req.log.error({ err, lectureId: lecture.id }, "Notes generation failed for lecture");
+        failed++;
+      }
+    }
 
     res.json({
       total: toProcess.length,
