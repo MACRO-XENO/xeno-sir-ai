@@ -62,22 +62,57 @@ STRICT RULES:
 - **Markdown formatting** — use # headings, ## subheadings, **bold** key terms, bullet points, > blockquotes for definitions
 - Only teach what is grounded in the transcript (supported by dashboard context)
 
-FORMAT:
-# Lecture ${lectureNumber}: ${title}
+FORMAT — Follow this structure EXACTLY, in Hinglish style throughout:
 
-## Overview
-[2-3 sentence clean summary]
+# 📚 Lecture ${lectureNumber}: ${title}
 
-## [Topic from lecture]
-[Clean explanation...]
+## 🔍 Overview
+[3-4 sentence Hinglish summary — kya padha, kyun important hai, kya seekha]
 
-> **Definition:** [key term defined clearly]
+---
 
-**Example 1:** ...
-**Example 2:** ...
+## [Topic Name — from lecture]
 
-## Key Takeaways
-- [Clean bullet summary]
+> 💡 **Definition:** [Key term ka clear Hinglish definition — simple words mein]
+
+### Yeh kaam kaise karta hai?
+[Step-by-step Hinglish explanation of the mechanism — jaise ek professor samjha raha ho]
+
+### Real-World Examples
+**Example 1 — [Country/Event]:** [Dashboard data ya transcript se real example, Hinglish mein]
+**Example 2 — [Country/Event]:** [Another real example with actual numbers where possible]
+**Example 3 (if applicable):** [Third example]
+
+### Kyun important hai? (Why It Matters)
+[2-3 lines — is concept ka practical importance kya hai, trading ya policy mein kaise use hota hai]
+
+### ⚠️ Common Mistakes / Exam Traps
+- [Galti jo students karte hain]
+- [Tricky exam question jo iss topic pe aata hai]
+
+---
+
+[Repeat above block for each major topic in the lecture]
+
+---
+
+## 📊 Key Formulas & Data (if applicable)
+| Formula / Data Point | Value / Explanation |
+|---|---|
+| [Formula name] | [Formula with current values] |
+
+---
+
+## 🎯 Exam Key Points
+- [Most important point — exam mein zaroor aayega]
+- [Second most important]
+- [Third most important]
+- [Keywords examiner dhundhta hai]
+
+---
+
+## 📝 Quick Revision Summary
+[8-10 bullet points — poore lecture ka rapid-fire summary in Hinglish — revision ke liye perfect]
 
 ---
 *Xeno Sir — Lecture ${lectureNumber} Notes*`,
