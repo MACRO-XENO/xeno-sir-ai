@@ -11,8 +11,8 @@ async function generateNotesFromTranscript(
   title: string,
   transcript: string
 ): Promise<string> {
-  // Safety truncation — only for extremely large transcripts (>80K chars)
-  const MAX_TRANSCRIPT_CHARS = 80000;
+  // Safety truncation — only for extremely large transcripts (>200K chars)
+  const MAX_TRANSCRIPT_CHARS = 200000;
   const safeTranscript = transcript.length > MAX_TRANSCRIPT_CHARS
     ? transcript.slice(0, MAX_TRANSCRIPT_CHARS) + "\n\n[...transcript truncated — all major concepts above are fully covered]"
     : transcript;
