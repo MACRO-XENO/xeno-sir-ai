@@ -209,32 +209,34 @@ router.post("/lectures/:id/generate-notes", requireAdmin, async (req: Request, r
   }
 });
 
-// Generate notes for ALL lectures that don't have notes yet
+// Generate notes for ALL lectures that don't have notes yet (parallel)
 router.post("/lectures/generate-all-notes", requireAdmin, async (req: Request, res: Response) => {
   try {
     const allLectures = await db.select().from(lecturesTable).orderBy(lecturesTable.lectureNumber);
     const withoutNotes = allLectures.filter(l => !l.notes || l.notes.trim().length === 0);
 
-    let generated = 0;
-    let failed = 0;
+    if (withoutNotes.length === 0) {
+      res.json({ total: 0, generated: 0, failed: 0, message: "All lectures already have notes." });
+      return;
+    }
 
-    for (const lecture of withoutNotes) {
-      try {
+    const results = await Promise.allSettled(
+      withoutNotes.map(async (lecture) => {
         const notes = await generateNotesFromTranscript(lecture.lectureNumber, lecture.title, lecture.transcript);
         await db.update(lecturesTable)
           .set({ notes, updatedAt: new Date() })
           .where(eq(lecturesTable.id, lecture.id));
-        generated++;
-      } catch {
-        failed++;
-      }
-    }
+      })
+    );
+
+    const generated = results.filter(r => r.status === "fulfilled").length;
+    const failed = results.filter(r => r.status === "rejected").length;
 
     res.json({
       total: withoutNotes.length,
       generated,
       failed,
-      message: `Notes generated for ${generated} lecture(s).${failed > 0 ? ` ${failed} failed.` : ""}`,
+      message: `Notes generated for ${generated} lecture(s).${failed > 0 ? ` ${failed} failed — try again.` : ""}`,
     });
   } catch (err) {
     req.log.error({ err }, "Generate all notes error");
