@@ -69,10 +69,6 @@ export default function StudentChat() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 4 * 1024 * 1024) {
-      alert("Image 4MB se chhoti honi chahiye. Please compress karke try karo.");
-      return;
-    }
     const reader = new FileReader();
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
