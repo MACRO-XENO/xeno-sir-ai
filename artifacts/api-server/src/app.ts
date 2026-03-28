@@ -6,10 +6,10 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
-const httpLogger = (pinoHttp as any).default || pinoHttp;
+const createHttpLogger = (pinoHttp as any).default ?? pinoHttp;
 
 app.use(
-  httpLogger({
+  createHttpLogger({
     logger,
     serializers: {
       req(req: any) {
