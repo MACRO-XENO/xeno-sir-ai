@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useLectures, useManageLectures, useStudents, useManageStudents } from "@/hooks/use-api-hooks";
+import { useLectures, useManageLectures, useStudents, useManageStudents, useGenerateLectureNotes, useGenerateAllNotes } from "@/hooks/use-api-hooks";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Textarea, Dialog, Badge } from "@/components/ui";
-import { Book, Users, Plus, Trash2, Edit, FileText, UserPlus, Clock, NotebookText } from "lucide-react";
+import { Book, Users, Plus, Trash2, Edit, FileText, UserPlus, Clock, NotebookText, Sparkles, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function AdminDashboard() {
@@ -39,9 +39,12 @@ export default function AdminDashboard() {
 function LecturesManager() {
   const { data: lectures = [], isLoading } = useLectures();
   const { create, update, remove } = useManageLectures();
+  const generateNotes = useGenerateLectureNotes();
+  const generateAllNotes = useGenerateAllNotes();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState<any>(null);
+  const [generatingId, setGeneratingId] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
     lectureNumber: "",
@@ -94,13 +97,48 @@ function LecturesManager() {
     }
   };
 
+  const handleGenerateNotes = async (id: number) => {
+    setGeneratingId(id);
+    try {
+      await generateNotes.mutateAsync(id);
+    } catch {
+      alert("Notes generation failed. Try again.");
+    } finally {
+      setGeneratingId(null);
+    }
+  };
+
+  const handleGenerateAllNotes = async () => {
+    if (!confirm("Generate AI notes for all lectures that don't have notes yet? This may take a minute.")) return;
+    try {
+      const result = await generateAllNotes.mutateAsync();
+      alert(result.message);
+    } catch {
+      alert("Failed to generate notes. Try again.");
+    }
+  };
+
+  const lecturesWithoutNotes = (lectures as any[]).filter((l: any) => !l.notes || l.notes.trim().length === 0);
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-3">
         <h2 className="text-xl font-display font-semibold text-foreground">Lecture Transcripts</h2>
-        <Button onClick={openAdd}>
-          <Plus className="w-4 h-4 mr-2" /> Add Lecture
-        </Button>
+        <div className="flex items-center gap-2">
+          {lecturesWithoutNotes.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleGenerateAllNotes}
+              isLoading={generateAllNotes.isPending}
+            >
+              <Sparkles className="w-4 h-4 mr-2 text-primary" />
+              Generate Notes ({lecturesWithoutNotes.length})
+            </Button>
+          )}
+          <Button onClick={openAdd}>
+            <Plus className="w-4 h-4 mr-2" /> Add Lecture
+          </Button>
+        </div>
       </div>
 
       <Card className="border-white/10">
@@ -134,6 +172,15 @@ function LecturesManager() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleGenerateNotes(l.id)}
+                    isLoading={generatingId === l.id}
+                    title="Regenerate Notes with AI"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => openEdit(l)}>
                     <Edit className="w-4 h-4" />
                   </Button>
