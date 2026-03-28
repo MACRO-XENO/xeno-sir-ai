@@ -17,7 +17,23 @@ export default function StudentChat() {
   const [input, setInput] = useState("");
   const [selectedLectures, setSelectedLectures] = useState<number[]>([]);
   const [language, setLanguage] = useState("auto");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" && window.innerWidth < 768
+  );
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window !== "undefined" && window.innerWidth >= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) setSidebarOpen(true);
+      else setSidebarOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -277,16 +293,43 @@ export default function StudentChat() {
 
       {/* Context Sidebar */}
       <AnimatePresence>
+        {sidebarOpen && isMobile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-40"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
         {sidebarOpen && (
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 300, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            initial={isMobile ? { x: "100%" } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0 } : { width: 300, opacity: 1 }}
+            exit={isMobile ? { x: "100%" } : { width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-l border-white/5 bg-card/30 backdrop-blur-xl flex flex-col shrink-0 overflow-hidden"
+            className={cn(
+              "bg-card/95 backdrop-blur-xl flex flex-col overflow-hidden",
+              isMobile
+                ? "fixed right-0 top-0 bottom-0 w-[280px] z-50 border-l border-white/10 shadow-2xl"
+                : "border-l border-white/5 shrink-0 w-[300px]"
+            )}
           >
             <div className="p-5 border-b border-white/5 flex items-center justify-between">
-              <h3 className="font-semibold text-foreground text-sm">Study Context</h3>
+              <div className="flex items-center gap-2">
+                {isMobile && (
+                  <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="p-1 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                    title="Close"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                )}
+                <h3 className="font-semibold text-foreground text-sm">Study Context</h3>
+              </div>
               <button
                 onClick={handleNewChat}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded-lg hover:bg-white/5"
