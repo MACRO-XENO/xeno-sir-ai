@@ -17,8 +17,7 @@ export default function StudentChat() {
   const [input, setInput] = useState("");
   const [selectedLectures, setSelectedLectures] = useState<number[]>([]);
   const [language, setLanguage] = useState("auto");
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" && window.innerWidth < 768
@@ -58,30 +57,29 @@ export default function StudentChat() {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!input.trim() && !imageBase64) || isStreaming) return;
-    sendMessage(input, selectedLectures.length > 0 ? selectedLectures : undefined, language, undefined, imageBase64 || undefined);
+    if ((!input.trim() && images.length === 0) || isStreaming) return;
+    sendMessage(input, selectedLectures.length > 0 ? selectedLectures : undefined, language, undefined, images.length > 0 ? images : undefined);
     setInput("");
-    setImageBase64(null);
-    setImagePreview(null);
+    setImages([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      setImageBase64(dataUrl);
-      setImagePreview(dataUrl);
-    };
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        setImages(prev => [...prev, dataUrl]);
+      };
+      reader.readAsDataURL(file);
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const clearImage = () => {
-    setImageBase64(null);
-    setImagePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleLectureToggle = (id: number) => {
@@ -243,12 +241,17 @@ export default function StudentChat() {
                   )}>
                     {msg.role === "user" ? (
                       <div className="space-y-2">
-                        {msg.imageUrl && (
-                          <img
-                            src={msg.imageUrl}
-                            alt="Uploaded"
-                            className="max-w-[240px] max-h-[180px] rounded-xl object-contain border border-white/10"
-                          />
+                        {msg.images && msg.images.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {msg.images.map((img, i) => (
+                              <img
+                                key={i}
+                                src={img}
+                                alt={`Uploaded ${i + 1}`}
+                                className="max-w-[200px] max-h-[160px] rounded-xl object-contain border border-white/10"
+                              />
+                            ))}
+                          </div>
                         )}
                         {msg.content && (
                           <p className="text-foreground whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -279,23 +282,25 @@ export default function StudentChat() {
         {/* Input Area */}
         <div className="p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent shrink-0">
           <div className="max-w-4xl mx-auto relative">
-            {/* Image Preview */}
-            {imagePreview && (
-              <div className="mb-2 pl-2">
-                <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="h-20 w-auto rounded-xl border border-white/10 object-contain"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearImage}
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center hover:bg-destructive/80 transition-colors"
-                  >
-                    <X className="w-3 h-3 text-white" />
-                  </button>
-                </div>
+            {/* Image Previews */}
+            {images.length > 0 && (
+              <div className="mb-2 pl-2 flex flex-wrap gap-2">
+                {images.map((img, i) => (
+                  <div key={i} className="relative inline-block">
+                    <img
+                      src={img}
+                      alt={`Preview ${i + 1}`}
+                      className="h-20 w-auto rounded-xl border border-white/10 object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center hover:bg-destructive/80 transition-colors"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
             <form onSubmit={handleSend} className="relative flex items-end gap-2 bg-card border border-white/10 rounded-2xl shadow-2xl p-2 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/30 transition-all">
@@ -303,13 +308,14 @@ export default function StudentChat() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
                 onChange={handleImageSelect}
               />
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isStreaming || !!imageBase64}
+                disabled={isStreaming}
                 className="shrink-0 w-10 h-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-white/5 flex items-center justify-center transition-colors disabled:opacity-30"
                 title="Photo attach karo"
               >
@@ -346,7 +352,7 @@ export default function StudentChat() {
                 ) : (
                   <button
                     type="submit"
-                    disabled={(!input.trim() && !imageBase64) || hasNoLectures}
+                    disabled={(!input.trim() && images.length === 0) || hasNoLectures}
                     className="w-10 h-10 rounded-xl bg-primary text-background flex items-center justify-center hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     <Send className="w-4 h-4 ml-0.5" />
